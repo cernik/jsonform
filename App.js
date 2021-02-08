@@ -19,6 +19,22 @@ import {Formik} from 'formik';
 import jsonform from './samples/sample.json';
 
 const App: () => React$Node = () => {
+  const [sample, setSample] = React.useState(jsonform);
+
+  React.useEffect(() => {
+    fetch(
+      'https://gist.githubusercontent.com/cernik/aebe78133d2e0fbfc64c974993d3c308/raw/6673224b6cdc23fbf96903818e44b015cd95c11b/sample.json',
+    )
+      .then((response) => response.json())
+      .then((json) => {
+        console.log('json', json);
+        setSample(json);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
+
   const renderField = (field, props) => {
     const {handleChange, handleBlur, setFieldValue, values} = props;
 
@@ -79,8 +95,9 @@ const App: () => React$Node = () => {
           keyboardType={keyboardType}
           onChangeText={handleChange(field.id)}
           onBlur={handleBlur(field.id)}
-          value={String(values[field.id])}
+          value={String(values[field.id] || '')}
           placeholder={field.placeholder}
+          style={{}}
         />
       </View>
     );
@@ -98,7 +115,7 @@ const App: () => React$Node = () => {
             <View style={styles.sectionContainer}>
               <Formik
                 enableReinitialize
-                initialValues={jsonform.fields.reduce(
+                initialValues={sample.fields.reduce(
                   (acc, f) => ({
                     ...acc,
                     [f.id]: f.value,
@@ -108,7 +125,7 @@ const App: () => React$Node = () => {
                 onSubmit={(values) => alert(JSON.stringify(values, null, 2))}>
                 {(props) => (
                   <React.Fragment>
-                    {jsonform.fields.map((field) => renderField(field, props))}
+                    {sample.fields.map((field) => renderField(field, props))}
                     <Button onPress={props.handleSubmit} title="Submit" />
                   </React.Fragment>
                 )}
