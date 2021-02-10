@@ -24,7 +24,7 @@ const App: () => React$Node = () => {
 
   React.useEffect(() => {
     fetch(
-      'https://gist.githubusercontent.com/cernik/aebe78133d2e0fbfc64c974993d3c308/raw/6673224b6cdc23fbf96903818e44b015cd95c11b/sample.json',
+      'https://gist.githubusercontent.com/cernik/aebe78133d2e0fbfc64c974993d3c308/raw/45d7e1ecd278f4ac3c657e73819a40219f34949d/sample.json',
     )
       .then((response) => response.json())
       .then((json) => {
