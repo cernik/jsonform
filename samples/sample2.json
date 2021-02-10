@@ -10,24 +10,6 @@
       "required": true
     },
     {
-      "id": "lastName",
-      "type": "input",
-      "subtype": "string",
-      "value": "",
-      "label": "Last Name",
-      "enabled": true,
-      "required": true
-    },
-    {
-      "id": "email",
-      "type": "input",
-      "subtype": "email",
-      "value": "",
-      "label": "Email",
-      "enabled": true,
-      "required": true
-    },
-    {
       "id": "age",
       "type": "input",
       "subtype": "number",
@@ -36,7 +18,10 @@
       "value": 10,
       "minValue": 0,
       "maxValue": 100,
-      "required": true
+      "required": true,
+      "events": {
+        "onChangeText": "(function(){return function al(e, values){setSampleText('another sample text and current value: ' + e);if(e == 33){setFieldValue('isSmoke',true);} if(e == 22){setFieldValue('isSmoke',false); }if(e > 55){handleSubmit();} console.log(values);};})();"
+      }
     },
     {
       "id": "isSmoke",

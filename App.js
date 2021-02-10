@@ -12,14 +12,15 @@ import {
   LayoutAnimation,
 } from 'react-native';
 import {TextField} from 'react-native-material-textfield';
-import {Header, Colors} from 'react-native/Libraries/NewAppScreen';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
 
 import {Formik} from 'formik';
 
-import jsonform from './samples/sample.json';
+import jsonform from './samples/sample2.json';
 
 const App: () => React$Node = () => {
   const [sample, setSample] = React.useState(jsonform);
+  const [sampleText, setSampleText] = React.useState('sampleText');
 
   React.useEffect(() => {
     fetch(
@@ -36,38 +37,32 @@ const App: () => React$Node = () => {
   }, []);
 
   const renderField = (field, props) => {
-    const {handleChange, handleBlur, setFieldValue, values} = props;
+    const {
+      handleChange,
+      handleSubmit,
+      handleBlur,
+      setFieldValue,
+      values,
+      setFieldTouched,
+    } = props;
 
     if (field.subtype === 'checkbox') {
       if (!field.enabled) {
         return null;
       }
+
+      const handlePress = () => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        setFieldValue(field.id, !values[field.id]);
+      };
+
       return (
         <View key={field.id} style={{marginTop: 16}}>
-          <Text style={{marginStart: 4}}>{field.label || ''}</Text>
-
+          <Text>{field.label || ''}</Text>
           <TouchableOpacity
-            onPress={() => {
-              LayoutAnimation.configureNext(
-                LayoutAnimation.Presets.easeInEaseOut,
-              );
-              setFieldValue(field.id, !values[field.id]);
-            }}
-            style={{
-              margin: 4,
-              height: 20,
-              width: 20,
-              borderWidth: 1,
-            }}>
-            {values[field.id] && (
-              <View
-                style={{
-                  margin: 3,
-                  backgroundColor: 'grey',
-                  flex: 1,
-                }}
-              />
-            )}
+            onPress={handlePress}
+            style={styles.checkboxContainer}>
+            {values[field.id] && <View style={styles.checkboxValue} />}
           </TouchableOpacity>
         </View>
       );
@@ -88,48 +83,60 @@ const App: () => React$Node = () => {
         return null;
       }
     }
+
+    const events = field.events;
+    let customOnChange;
+    if (events && events.onChangeText && events.onChangeText) {
+      customOnChange = eval(events.onChangeText);
+    }
+
+    const onChange = (val) => {
+      setFieldValue(field.id, val);
+      if (customOnChange) {
+        customOnChange(val, props);
+      }
+    };
+
     return (
-      <View key={field.id}>
-        <TextField
-          label={field.label}
-          keyboardType={keyboardType}
-          onChangeText={handleChange(field.id)}
-          onBlur={handleBlur(field.id)}
-          value={String(values[field.id] || '')}
-          placeholder={field.placeholder}
-          style={{}}
-        />
-      </View>
+      <TextField
+        key={field.id}
+        label={field.label}
+        keyboardType={keyboardType}
+        onChangeText={onChange}
+        onBlur={handleBlur(field.id)}
+        value={String(values[field.id] || '')}
+        placeholder={field.placeholder}
+      />
     );
   };
 
   return (
     <React.Fragment>
       <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
+      <SafeAreaView style={styles.container}>
         <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header style={{height: 80}} />
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Formik
-                enableReinitialize
-                initialValues={sample.fields.reduce(
-                  (acc, f) => ({
-                    ...acc,
-                    [f.id]: f.value,
-                  }),
-                  {},
-                )}
-                onSubmit={(values) => alert(JSON.stringify(values, null, 2))}>
-                {(props) => (
-                  <React.Fragment>
-                    {sample.fields.map((field) => renderField(field, props))}
-                    <Button onPress={props.handleSubmit} title="Submit" />
-                  </React.Fragment>
-                )}
-              </Formik>
+          style={styles.scrollView}
+          contentContainerStyle={styles.container}>
+          <View style={styles.sectionContainer}>
+            <Formik
+              enableReinitialize
+              initialValues={sample.fields.reduce(
+                (acc, f) => ({
+                  ...acc,
+                  [f.id]: f.value,
+                }),
+                {},
+              )}
+              onSubmit={(values) => alert(JSON.stringify(values, null, 2))}>
+              {(props) => (
+                <React.Fragment>
+                  {sample.fields.map((field) => renderField(field, props))}
+                  <Button onPress={props.handleSubmit} title="Submit" />
+                </React.Fragment>
+              )}
+            </Formik>
+            <View style={styles.sampleText}>
+              <Text>{sampleText}</Text>
             </View>
           </View>
         </ScrollView>
@@ -139,15 +146,33 @@ const App: () => React$Node = () => {
 };
 
 const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
+  container: {
+    flex: 1,
   },
-  body: {
+  scrollView: {
     backgroundColor: Colors.white,
   },
   sectionContainer: {
     marginTop: 32,
     paddingHorizontal: 24,
+    flex: 1,
+  },
+  sampleText: {
+    flex: 1,
+    borderWidth: 1,
+    alignSelf: 'stretch',
+    alignItems: 'center',
+  },
+  checkboxContainer: {
+    marginVertical: 8,
+    height: 20,
+    width: 20,
+    borderWidth: 1,
+  },
+  checkboxValue: {
+    margin: 3,
+    backgroundColor: 'grey',
+    flex: 1,
   },
 });
 
